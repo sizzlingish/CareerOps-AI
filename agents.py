@@ -1,132 +1,216 @@
-from crewai import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 
+from crewai import Agent
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-# -------------------------------------------------
-# Gemini LLM
-# -------------------------------------------------
+
+# =================================================
+# Gemini LLM Configuration
+# =================================================
+
+# The API key is read from:
+# Streamlit Cloud Secrets:
+#
+# GOOGLE_API_KEY = "your_api_key"
+#
+# For local development, it can come from .env
+
+google_api_key = os.getenv("GOOGLE_API_KEY")
+
+
+if not google_api_key:
+    raise ValueError(
+        "GOOGLE_API_KEY is not configured. "
+        "Add GOOGLE_API_KEY to Streamlit Secrets or your .env file."
+    )
+
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    temperature=0
+    temperature=0,
+    google_api_key=google_api_key
 )
 
 
-# -------------------------------------------------
-# 1. Manager Agent
-# -------------------------------------------------
-
-manager_agent = Agent(
-    role="Career Operations Manager",
-    goal="Coordinate the career application workflow and ensure every agent completes its task.",
-    backstory=(
-        "You are an experienced career operations manager. "
-        "You coordinate specialized AI agents to help candidates "
-        "find opportunities, create applications, and prepare for interviews."
-    ),
-    llm=llm,
-    verbose=True
-)
-
-
-# -------------------------------------------------
-# 2. Job Analyst Agent
-# -------------------------------------------------
+# =================================================
+# 1. Job Analyst Agent
+# =================================================
 
 job_analyst_agent = Agent(
+
     role="Job Analyst",
-    goal="Analyze the job description and identify the requirements of the position.",
-    backstory=(
-        "You are a professional recruitment analyst. "
-        "You carefully examine job descriptions and extract "
-        "qualifications, skills, responsibilities, and important keywords."
+
+    goal=(
+        "Analyze job descriptions accurately and identify the "
+        "requirements, responsibilities, qualifications, skills, "
+        "and important keywords needed for the position."
     ),
+
+    backstory=(
+        "You are an experienced recruitment and job-description analyst. "
+        "You carefully examine job descriptions and extract useful "
+        "information without inventing or assuming requirements. "
+        "Your analysis should help other career agents understand exactly "
+        "what the employer is looking for."
+    ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
 
 
-# -------------------------------------------------
-# 3. CV Agent
-# -------------------------------------------------
+# =================================================
+# 2. CV Analyst Agent
+# =================================================
 
 cv_agent = Agent(
+
     role="CV Analyst",
-    goal="Analyze the candidate's CV and identify relevant qualifications and experience.",
-    backstory=(
-        "You are a professional CV analyst. "
-        "You identify the candidate's education, skills, projects, "
-        "experience, achievements, and other relevant qualifications."
+
+    goal=(
+        "Analyze the candidate's CV and identify their education, "
+        "technical skills, projects, work experience, certifications, "
+        "achievements, and relevant qualifications."
     ),
+
+    backstory=(
+        "You are a professional CV and resume analyst. "
+        "You carefully examine candidate information and create an "
+        "accurate profile based only on information contained in the CV. "
+        "You never invent skills, experience, qualifications, "
+        "achievements, or projects."
+    ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
 
 
-# -------------------------------------------------
-# 4. Matching Agent
-# -------------------------------------------------
+# =================================================
+# 3. Candidate-Job Matching Agent
+# =================================================
 
 matching_agent = Agent(
+
     role="Candidate-Job Matching Specialist",
-    goal="Compare the candidate's qualifications with the job requirements.",
-    backstory=(
-        "You specialize in matching candidates to job opportunities. "
-        "You identify direct matches, partial matches, missing requirements, "
-        "and areas that should be emphasized in the application."
+
+    goal=(
+        "Compare the candidate's qualifications with the job requirements "
+        "and identify direct matches, partial matches, missing requirements, "
+        "relevant evidence, and potential skill gaps."
     ),
+
+    backstory=(
+        "You specialize in analyzing the relationship between candidates "
+        "and job opportunities. You compare the job requirements against "
+        "the candidate's actual CV information. You clearly distinguish "
+        "between demonstrated qualifications, partial matches, and "
+        "requirements that are not demonstrated. You never invent "
+        "qualifications."
+    ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
 
 
-# -------------------------------------------------
-# 5. Application Agent
-# -------------------------------------------------
+# =================================================
+# 4. Application Agent
+# =================================================
 
 application_agent = Agent(
-    role="Application Specialist",
-    goal="Create customized and truthful application materials for the job.",
+
+    role="Career Application Specialist",
+
+    goal=(
+        "Create customized and professional application materials "
+        "based on the job requirements and the candidate's actual "
+        "qualifications."
+    ),
+
     backstory=(
         "You are an expert career application writer. "
-        "You create professional profiles, cover letters, "
-        "and application responses based only on the candidate's actual experience."
+        "You create professional profiles, customized cover letters, "
+        "CV improvement suggestions, and keyword recommendations. "
+        "Everything you write must remain truthful and supported by "
+        "the candidate's CV. You never invent experience, education, "
+        "projects, achievements, qualifications, or skills."
     ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
 
 
-# -------------------------------------------------
-# 6. Interview Agent
-# -------------------------------------------------
+# =================================================
+# 5. Interview Preparation Agent
+# =================================================
 
 interview_agent = Agent(
+
     role="Interview Preparation Specialist",
-    goal="Prepare the candidate for a job-specific interview.",
-    backstory=(
-        "You are an experienced interview coach. "
-        "You create technical, behavioral, and role-specific questions "
-        "based on the actual job requirements and the candidate's background."
+
+    goal=(
+        "Prepare the candidate for a job-specific interview using "
+        "the actual job requirements and the candidate's background."
     ),
+
+    backstory=(
+        "You are an experienced interview preparation coach. "
+        "You create technical, behavioral, HR, and CV-specific "
+        "interview questions. You also provide preparation guidance "
+        "and useful questions the candidate can ask the employer. "
+        "Your preparation must be relevant to the specific position "
+        "and candidate."
+    ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
 
 
-# -------------------------------------------------
-# 7. Reviewer Agent
-# -------------------------------------------------
+# =================================================
+# 6. Career Application Reviewer Agent
+# =================================================
 
 reviewer_agent = Agent(
+
     role="Career Application Reviewer",
-    goal="Review the complete application and identify errors, gaps, and improvements.",
-    backstory=(
-        "You are a strict final reviewer. "
-        "You check applications for accuracy, relevance, unsupported claims, "
-        "missing requirements, and professional quality."
+
+    goal=(
+        "Perform a strict final review of the complete CareerOps "
+        "application package and identify unsupported claims, "
+        "missing requirements, errors, gaps, and areas for improvement."
     ),
+
+    backstory=(
+        "You are the final quality-control reviewer for a career "
+        "application package. You carefully examine the job analysis, "
+        "CV analysis, candidate-job matching report, application "
+        "materials, and interview preparation. You check for accuracy, "
+        "relevance, unsupported claims, missing information, and "
+        "professional quality. You never approve information that "
+        "is not supported by the candidate's CV."
+    ),
+
     llm=llm,
-    verbose=True
+
+    verbose=True,
+
+    allow_delegation=False
 )
