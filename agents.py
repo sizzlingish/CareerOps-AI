@@ -21,7 +21,7 @@ if not GOOGLE_API_KEY:
 # =================================================
 
 llm = LLM(
-    model="gemini/gemini-2.5-flash",
+    model="gemini/gemini-3.8-flash",
     api_key=GOOGLE_API_KEY,
     temperature=0
 )
