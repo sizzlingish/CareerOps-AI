@@ -1,7 +1,6 @@
 from crewai import Crew, Process
 
 from agents import (
-    manager_agent,
     job_analyst_agent,
     cv_agent,
     matching_agent,
@@ -27,7 +26,6 @@ from tasks import (
 careerops_crew = Crew(
 
     agents=[
-        manager_agent,
         job_analyst_agent,
         cv_agent,
         matching_agent,
@@ -58,10 +56,32 @@ careerops_crew = Crew(
 def run_careerops(cv_text, job_description):
 
     result = careerops_crew.kickoff(
+
         inputs={
             "cv_text": cv_text,
             "job_description": job_description
         }
     )
 
-    return result
+
+    # -------------------------------------------------
+    # Get Individual Task Outputs
+    # -------------------------------------------------
+
+    return {
+
+        "job_analysis": job_analysis_task.output.raw,
+
+        "cv_analysis": cv_analysis_task.output.raw,
+
+        "matching": matching_task.output.raw,
+
+        "application": application_task.output.raw,
+
+        "interview": interview_task.output.raw,
+
+        "review": review_task.output.raw,
+
+        "final": result.raw
+
+    }
