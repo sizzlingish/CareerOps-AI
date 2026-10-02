@@ -1,34 +1,29 @@
 import os
 
-from crewai import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
+from crewai import Agent, LLM
 
 
 # =================================================
-# Gemini LLM Configuration
+# Gemini API Key
 # =================================================
 
-# The API key is read from:
-# Streamlit Cloud Secrets:
-#
-# GOOGLE_API_KEY = "your_api_key"
-#
-# For local development, it can come from .env
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-google_api_key = os.getenv("GOOGLE_API_KEY")
-
-
-if not google_api_key:
+if not GOOGLE_API_KEY:
     raise ValueError(
         "GOOGLE_API_KEY is not configured. "
-        "Add GOOGLE_API_KEY to Streamlit Secrets or your .env file."
+        "Please add GOOGLE_API_KEY to Streamlit Cloud Secrets."
     )
 
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0,
-    google_api_key=google_api_key
+# =================================================
+# Gemini LLM
+# =================================================
+
+llm = LLM(
+    model="gemini/gemini-2.5-flash",
+    api_key=GOOGLE_API_KEY,
+    temperature=0
 )
 
 
@@ -37,7 +32,6 @@ llm = ChatGoogleGenerativeAI(
 # =================================================
 
 job_analyst_agent = Agent(
-
     role="Job Analyst",
 
     goal=(
@@ -55,9 +49,7 @@ job_analyst_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
 
@@ -67,7 +59,6 @@ job_analyst_agent = Agent(
 # =================================================
 
 cv_agent = Agent(
-
     role="CV Analyst",
 
     goal=(
@@ -85,9 +76,7 @@ cv_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
 
@@ -97,7 +86,6 @@ cv_agent = Agent(
 # =================================================
 
 matching_agent = Agent(
-
     role="Candidate-Job Matching Specialist",
 
     goal=(
@@ -116,9 +104,7 @@ matching_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
 
@@ -128,7 +114,6 @@ matching_agent = Agent(
 # =================================================
 
 application_agent = Agent(
-
     role="Career Application Specialist",
 
     goal=(
@@ -147,9 +132,7 @@ application_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
 
@@ -159,7 +142,6 @@ application_agent = Agent(
 # =================================================
 
 interview_agent = Agent(
-
     role="Interview Preparation Specialist",
 
     goal=(
@@ -177,9 +159,7 @@ interview_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
 
@@ -189,7 +169,6 @@ interview_agent = Agent(
 # =================================================
 
 reviewer_agent = Agent(
-
     role="Career Application Reviewer",
 
     goal=(
@@ -209,8 +188,6 @@ reviewer_agent = Agent(
     ),
 
     llm=llm,
-
     verbose=True,
-
     allow_delegation=False
 )
